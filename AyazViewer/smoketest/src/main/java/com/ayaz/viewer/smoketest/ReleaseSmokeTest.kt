@@ -246,7 +246,7 @@ class ReleaseSmokeTest {
 
     private fun tapFirstCell(grid: UiObject2) {
         val b = grid.visibleBounds
-        val dp = device.displayDensity / 160f
+        val dp = context.resources.displayMetrics.density
         // Satır başlığı (en fazla ~36dp) ve sütun başlığı (24dp) sonrasındaki ilk hücre (A1).
         device.click(b.left + (58 * dp).toInt(), b.top + (34 * dp).toInt())
         device.waitForIdle()
