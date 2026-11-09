@@ -207,7 +207,14 @@ class ReleaseSmokeTest {
         val ok = device.wait(Until.findObject(By.desc("Kaydet").enabled(false)), TIMEOUT)
         if (ok == null) {
             screenshot("hata_kaydet_" + SystemClock.uptimeMillis())
-            fail("$what kaydedilemedi | bildirim: ${toast ?: "(görülmedi)"} | ekran: ${screenSummary().replace("\n", " ; ")}")
+            val crash = shell("logcat -b crash -d").takeLast(2500)
+            val log = shell("logcat -d -t 4000").lines()
+                .filter { l -> listOf("AndroidRuntime", "PdfBox", "System.err", "ayaz", "FATAL").any { l.contains(it) } }
+                .takeLast(40).joinToString(" | ")
+            fail(
+                "$what kaydedilemedi | bildirim: ${toast ?: "(görülmedi)"} | ekran: ${screenSummary().replace("\n", " ; ")}" +
+                    " || ÇÖKME: ${crash.replace("\n", " | ")} || LOG: $log",
+            )
         }
         assertNoCrash()
     }
