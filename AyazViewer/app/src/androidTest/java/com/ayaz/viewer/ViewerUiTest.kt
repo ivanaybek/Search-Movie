@@ -149,9 +149,14 @@ class ViewerUiTest {
             rule.onNode(hasSetTextAction()).performTextInput("Çay")
             rule.onNode(hasSetTextAction()).performImeAction()
             waitDesc("Seçili hücre A2")
+            // Her dönüşün bitmesi beklenir; aksi halde yeniden oluşturma sürerken ikinci dönüş veya ekranın
+            // kapatılması (ActivityScenario.close) takılabiliyordu.
             scenario.onActivity { it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE }
+            awaitOrientation(scenario, Configuration.ORIENTATION_LANDSCAPE)
             waitDesc("Tablo: Satışlar")
             scenario.onActivity { it.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT }
+            awaitOrientation(scenario, Configuration.ORIENTATION_PORTRAIT)
+            waitDesc("Tablo: Satışlar")
         }
     }
 
