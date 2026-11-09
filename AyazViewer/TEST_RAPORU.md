@@ -11,7 +11,7 @@ Tarih: 9 Kasım 2026 • Sürüm: 1.0.0 (yayına hazırlık) • Derleme: GitHub
 |---|---|
 | XLSX motoru birim testleri (`:xlsx:test`) | ✅ Başarılı |
 | Uygulama birim testleri (`:app:testDebugUnitTest`) | ✅ Başarılı |
-| Debug APK (`assembleDebug`) | ✅ Üretildi → `AyazViewer-debug.apk` (Actions → Artifacts) |
+| Debug APK (`assembleDebug`) | ✅ Üretildi → depoda `AyazViewer/AyazViewer-debug.apk` |
 | Yayın sürümü: APK + Google Play AAB (`assembleRelease`, `bundleRelease`, R8 ile küçültülmüş) | ✅ Derlendi (imzalama sırları tanımlanınca imzalı AAB `yayin/` klasörüne eklenir) |
 | Yayın testi sürümü (`staging`) ve `smoketest` modülü | ✅ Derlendi |
 | **16 KB bellek sayfası uyumluluğu** (Google Play zorunluluğu): `zipalign -P 16` + yerel kitaplık ELF hizalaması | ✅ “Tüm yerel kitaplıklar 16 KB uyumlu” |
@@ -90,17 +90,20 @@ görür ve dokunur. Böylece küçültme (R8) sonrası çıkabilecek çökmeleri
 
 | Adım | Sonuç |
 |---|---|
-| Başka bir uygulamadan (WhatsApp gibi, geçici izinle) "Birlikte aç": 6 sayfalık PDF | SONUC_1 |
-| "Birlikte aç": 2 sayfalı, biçimli Excel | SONUC_1 |
-| Ana sayfa: iki dosya da "Son dosyalar"da | SONUC_1 |
-| Paylaş penceresi: yalnızca WhatsApp ve Telegram | SONUC_1 |
-| Oluştur → metinden PDF (PDFBox + gömülü Türkçe yazı tipi) | SONUC_2 |
-| PDF'e kalem + vurgulayıcı ile çizim → Kaydet → üzerine yaz | SONUC_2 |
-| Oluştur → yeni Excel → A1'e yaz → uygula → Kaydet → üzerine yaz | SONUC_2 |
-| Ayarlar → Açık kaynak lisansları | SONUC_2 |
-| Her adımda çökme (crash) ve "yanıt vermiyor" (ANR) kontrolü | SONUC_2 |
+| Başka bir uygulamadan (WhatsApp gibi, geçici izinle) "Birlikte aç": 6 sayfalık PDF | ✅ Geçti |
+| "Birlikte aç": 2 sayfalı, biçimli Excel | ✅ Geçti |
+| Ana sayfa: iki dosya da "Son dosyalar"da | ✅ Geçti |
+| Paylaş penceresi: yalnızca WhatsApp ve Telegram | ✅ Geçti |
+| Oluştur → metinden PDF (PDFBox + gömülü Türkçe yazı tipi) | ✅ Geçti |
+| PDF'e kalem + vurgulayıcı ile çizim → Kaydet → üzerine yaz | ✅ Geçti |
+| Oluştur → yeni Excel → A1'e yaz → uygula → Kaydet → üzerine yaz | ✅ Geçti |
+| Ayarlar → Açık kaynak lisansları | ✅ Geçti |
+| Her adımda çökme (crash) ve "yanıt vermiyor" (ANR) kontrolü | ✅ Geçti |
 
+**Sonuç: ✅ 1/1 test geçti** (Android 15 emülatörü, Pixel 2 profili, R8 ile küçültülmüş `staging` sürümü).
 Test sırasında çekilen ekran görüntüleri Play Store için `magaza/ekran-goruntuleri/` klasörüne eklenir.
+
+Bu test ilk çalıştırmalarda gerçek bir hata yakaladı (aşağıda, 3c) ve hata düzeltilene kadar geçmedi.
 
 ## 3c. Bu turda bulunup düzeltilen hatalar
 
