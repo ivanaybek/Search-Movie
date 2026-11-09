@@ -113,6 +113,10 @@ Test sırasında çekilen ekran görüntüleri Play Store için `magaza/ekran-go
   yeniden oluşturulsa da korunuyor.
 - PDF sayfa göstergesi gezinme çubuğu yüksekliği kadar fazladan yukarıda duruyordu → düzeltildi.
 - Açık kaynak lisans bildirimleri (Apache 2.0, PDFBox NOTICE, DejaVu) uygulamada yoktu → Ayarlar → Hakkında'ya eklendi.
+- **Yayın testinin bulduğu hata:** PDF'e çizip "Asıl dosyanın üzerine yaz" denince dosya doğru kaydediliyordu, ama
+  ekranda sayfanın eski görüntüsü kalıyordu; kaydedilen çizimler kaybolmuş gibi görünüyordu (sayfa döndürme ve
+  silmede de aynı sorun vardı) → sayfa artık yeni dosyadan yeniden çiziliyor. `ViewerUiTest.pdfDrawAndSave` artık
+  kayıttan sonra çizimin ekranda göründüğünü de denetliyor.
 
 Önceki geliştirme turlarında testlerin ortaya çıkarıp düzeltilen gerçek hatalar:
 - PDF işaretlemeleri ilk sürümde PDF notu olarak yazılıyordu; Android'in PdfRenderer'ı notları çizmediği için kaydedilen

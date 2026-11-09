@@ -128,7 +128,7 @@ class ReleaseSmokeTest {
             screenshot("hata_vurgu_" + SystemClock.uptimeMillis())
             fail("Kaydedilen PDF'te vurgu ekranda görünmüyor (sarı piksel: $yellow)")
         }
-        device.pressBack()
+        leaveViewerSaved("PDF")
 
         // 7) Oluştur → yeni Excel tablosu, bir hücreye yaz ve kaydet
         waitFor(By.text("Dosya Aç"), "Ana sayfaya dönülmedi")
@@ -142,7 +142,7 @@ class ReleaseSmokeTest {
         waitFor(By.desc("Değeri uygula"), "Uygula düğmesi yok").click()
         waitFor(By.desc("Düzenlenen hücre A2"), "Değer uygulanmadı")
         save("Excel")
-        device.pressBack()
+        leaveViewerSaved("Excel")
 
         // 8) Ayarlar ve açık kaynak lisansları
         waitFor(By.text("Ayarlar"), "Alt menü yok").click()
@@ -210,31 +210,38 @@ class ReleaseSmokeTest {
         "(ekran okunamadı: $e)"
     }
 
-    /** Kaydet → "Asıl dosyanın üzerine yaz"; kayıt bitince Kaydet düğmesi yeniden pasifleşir. */
+    /** Kaydet → "Asıl dosyanın üzerine yaz". Kaydın bittiği [leaveViewerSaved] ile doğrulanır. */
     private fun save(what: String) {
-        waitFor(By.desc("Kaydet").enabled(true), "$what: Kaydet düğmesi etkin değil (değişiklik algılanmadı)").click()
+        waitFor(By.desc("Kaydet"), "$what: Kaydet düğmesi yok").click()
         waitFor(By.text("Asıl dosyanın üzerine yaz"), "$what: kaydetme seçenekleri çıkmadı").click()
-        // Uygulama sonucu kısa bir bildirimle (Toast) söyler: "Kaydedildi…" veya "Kaydedilemedi: …"
-        val toast = device.wait(Until.findObject(By.textStartsWith("Kaydedil")), 3_000)?.text
-        // Seçici önbelleği "etkin" durumunu geç güncelleyebildiği için düğmenin güncel durumu doğrudan okunur.
-        val deadline = SystemClock.uptimeMillis() + TIMEOUT
-        var ok = false
-        while (!ok && SystemClock.uptimeMillis() < deadline) {
-            ok = try { device.findObject(By.desc("Kaydet"))?.isEnabled == false } catch (_: Exception) { false }
-            if (!ok) SystemClock.sleep(300)
-        }
-        if (!ok) {
-            screenshot("hata_kaydet_" + SystemClock.uptimeMillis())
-            val crash = shell("logcat -b crash -d").takeLast(2500)
-            val log = shell("logcat -d -t 4000").lines()
-                .filter { l -> listOf("AndroidRuntime", "PdfBox", "System.err", "ayaz", "FATAL").any { l.contains(it) } }
-                .takeLast(40).joinToString(" | ")
-            fail(
-                "$what kaydedilemedi | bildirim: ${toast ?: "(görülmedi)"} | ekran: ${screenSummary().replace("\n", " ; ")}" +
-                    " || ÇÖKME: ${crash.replace("\n", " | ")} || LOG: $log",
-            )
-        }
+        device.wait(Until.gone(By.text("Asıl dosyanın üzerine yaz")), 5_000)
+        SystemClock.sleep(3_000)
         assertNoCrash()
+    }
+
+    /**
+     * Görüntüleyiciden Geri ile çıkar. Kayıt tamamlandıysa "Kaydedilmemiş değişiklikler" uyarısı çıkmaz.
+     * (Not: Compose'daki devre dışı düğmeler erişilebilirlik ağacında güvenilir biçimde "pasif" görünmediği
+     * için kayıt, düğme durumuyla değil bu davranışla doğrulanır.)
+     */
+    private fun leaveViewerSaved(what: String) {
+        val deadline = SystemClock.uptimeMillis() + TIMEOUT
+        while (SystemClock.uptimeMillis() < deadline) {
+            device.pressBack() // ilk basış klavyeyi kapatabilir; o yüzden döngü
+            val end = SystemClock.uptimeMillis() + 2_500
+            while (SystemClock.uptimeMillis() < end) {
+                if (device.hasObject(By.text("Dosya Aç"))) return
+                if (device.hasObject(By.text("Kaydedilmemiş değişiklikler"))) break
+                SystemClock.sleep(200)
+            }
+            if (device.hasObject(By.text("Kaydedilmemiş değişiklikler"))) {
+                device.findObject(By.text("Vazgeç"))?.click() // kayıt sürüyor olabilir; bekleyip yeniden dene
+                SystemClock.sleep(1_500)
+            }
+        }
+        screenshot("hata_kaydet_" + SystemClock.uptimeMillis())
+        val crash = shell("logcat -b crash -d").takeLast(2500)
+        fail("$what kaydedilemedi: çıkarken hâlâ \"kaydedilmemiş değişiklikler\" uyarısı çıkıyor || ÇÖKME: ${crash.replace("\n", " | ")}")
     }
 
     /** Kaydırılabilir listede aşağı doğru arar. */
