@@ -1,9 +1,12 @@
 package com.ayaz.viewer.smoketest
 
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Point
 import android.os.SystemClock
+import android.view.KeyEvent
 import androidx.core.content.FileProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -14,6 +17,7 @@ import androidx.test.uiautomator.UiDevice
 import androidx.test.uiautomator.UiObject2
 import androidx.test.uiautomator.Until
 import java.io.File
+import java.util.regex.Pattern
 import org.junit.After
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -187,12 +191,10 @@ class ReleaseSmokeTest {
 
     /** Hata ayıklama: ekrandaki metinler ve açıklamalar (hata mesajına eklenir). */
     private fun screenSummary(): String = try {
-        val out = java.io.ByteArrayOutputStream()
-        device.dumpWindowHierarchy(out)
-        val xml = out.toString("UTF-8")
-        Regex("""(text|content-desc)="([^"]+)"""").findAll(xml)
-            .map { "${it.groupValues[1]}: ${it.groupValues[2].take(80)}" }
-            .distinct().take(60).joinToString("\n")
+        val any = Pattern.compile(".+", Pattern.DOTALL)
+        val texts = device.findObjects(By.text(any)).map { "text: ${it.text.take(80)}" }
+        val descs = device.findObjects(By.desc(any)).map { "desc: ${it.contentDescription.take(80)}" }
+        (texts + descs).distinct().take(60).joinToString("\n").ifEmpty { "(erişilebilirlik ağacında metin yok)" }
     } catch (e: Exception) {
         "(ekran okunamadı: $e)"
     }
@@ -220,16 +222,29 @@ class ReleaseSmokeTest {
         device.findObject(By.scrollable(true).pkg(PKG))?.scroll(Direction.UP, 3f)
     }
 
+    /**
+     * Metin alanına yazar. Önce erişilebilirlik "metni ayarla" eylemi denenir; Compose alanı bunu
+     * kabul etmezse metin panoya konup yapıştırılır (Türkçe karakterler korunur).
+     */
     private fun typeInto(selector: BySelector, text: String) {
-        val field = waitFor(selector, "Metin alanı yok")
-        field.click()
+        waitFor(selector, "Metin alanı yok").click()
         device.waitForIdle()
-        field.text = text
+        fun current() = device.findObject(selector)?.text.orEmpty()
+        fun ok() = current().contains(text.take(6))
+
+        device.findObject(selector)?.text = text
         device.waitForIdle()
-        val now = device.findObject(selector)?.text.orEmpty()
-        if (!now.contains(text.take(6))) {
+        if (!ok()) {
+            val clipboard = context.getSystemService(ClipboardManager::class.java)
+            instrumentation.runOnMainSync { clipboard.setPrimaryClip(ClipData.newPlainText("smoke", text)) }
+            device.findObject(selector)?.click()
+            device.waitForIdle()
+            device.pressKeyCode(KeyEvent.KEYCODE_PASTE)
+            device.wait(Until.findObject(By.textContains(text.take(6))), 3_000)
+        }
+        if (!ok()) {
             screenshot("hata_" + SystemClock.uptimeMillis())
-            fail("Metin yazılamadı ($selector): \"$now\"\nEkrandakiler:\n${screenSummary()}")
+            fail("Metin yazılamadı ($selector): \"${current()}\"\nEkrandakiler:\n${screenSummary()}")
         }
     }
 

@@ -235,7 +235,7 @@ jobs:
           script: |
             ./gradlew --no-daemon :smoketest:connectedStagingAndroidTest || touch smoke_failed
             mkdir -p shots && adb pull /data/local/tmp/ayaz-shots shots/ || true
-            if [ -f smoke_failed ]; then adb logcat -d -t 400 | grep -iE "ayaz|AndroidRuntime|pdfbox" | tail -80 || true; fi
+            if [ -f smoke_failed ]; then adb logcat -d -t 400 | grep -iE "ayaz|AndroidRuntime|pdfbox|UiObject2|SET_TEXT|Clipboard" | tail -80 || true; fi
             if [ -f smoke_failed ]; then for f in shots/ayaz-shots/hata_*.png; do [ -f "$f" ] && { echo "BEGIN-SHOT $f"; base64 "$f"; echo "END-SHOT"; }; done; fi
             test ! -f smoke_failed
 
