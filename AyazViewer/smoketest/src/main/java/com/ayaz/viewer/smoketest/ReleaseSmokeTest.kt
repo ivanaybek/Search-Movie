@@ -56,17 +56,17 @@ class ReleaseSmokeTest {
 
     @Test
     fun releaseBuildEndToEnd() {
-        // 1) Başka bir uygulamadan (WhatsApp gibi) geçici izinle "Birlikte aç": PDF
+        // 1) Başka bir uygulamadan (WhatsApp gibi) geçici izinle "Birlikte aç": 6 sayfalık PDF
         openWith("Proje Raporu.pdf", "application/pdf")
-        waitFor(By.text("30 sayfa"), "PDF açılmadı")
+        waitFor(By.text("6 sayfa"), "PDF açılmadı")
         settle(2000)
         screenshot("2_pdf")
         device.pressBack()
 
-        // 2) "Birlikte aç": Excel (çok sayfalı, biçimli)
+        // 2) "Birlikte aç": Excel (2 sayfalı, biçimli)
         openWith("Bütçe 2026.xlsx", XLSX)
-        waitFor(By.desc("Tablo: Özet"), "Excel tablosu açılmadı")
-        waitFor(By.text("Veriler"), "Sayfa sekmeleri görünmedi")
+        waitFor(By.desc("Tablo: Aylık Bütçe"), "Excel tablosu açılmadı")
+        waitFor(By.text("Gelirler"), "Sayfa sekmeleri görünmedi")
         settle(1500)
         screenshot("3_excel")
         device.pressBack()
@@ -86,7 +86,7 @@ class ReleaseSmokeTest {
         waitFor(By.text("WhatsApp"), "Paylaşım penceresinde WhatsApp yok")
         waitFor(By.text("Telegram"), "Paylaşım penceresinde Telegram yok")
         settle(800)
-        screenshot("5_paylas")
+        screenshot("test_paylas") // emülatörde WhatsApp/Telegram yüklü değil; mağaza için kullanılmaz
         device.pressBack()
         device.wait(Until.gone(By.text("Telegram")), 5_000)
 
@@ -114,7 +114,7 @@ class ReleaseSmokeTest {
         waitFor(By.desc("Araç: Vurgulayıcı"), "Vurgulayıcı yok").click()
         drawLine(page, 0.42f)
         settle(800)
-        screenshot("6_pdf_duzenleme")
+        screenshot("5_pdf_duzenleme")
         save("PDF")
         // Kaydedilen vurgu, belge yeniden açıldıktan sonra sayfanın kendisinde görünmeli.
         var yellow = 0

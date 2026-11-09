@@ -12,8 +12,9 @@ yapıştırmanız yeterli. Adım adım yayınlama rehberi için: [`../YAYINLAMA.
 | Telefon ekran görüntüleri | [`ekran-goruntuleri/`](ekran-goruntuleri/) | 1080 × 1920 PNG (9:16) |
 
 Ekran görüntüleri, uygulamanın yayın sürümü emülatörde otomatik test edilirken çekilir ve her başarılı
-derlemede bu klasöre eklenir. Önerilen sıra: `1_ana_sayfa`, `2_pdf`, `3_excel`, `4_olustur`, `5_paylas`,
-`6_pdf_duzenleme`. Simge ve öne çıkan görsel `tools/generate_store_graphics.py` ile üretilir.
+derlemede bu klasöre eklenir. Önerilen sıra: `1_ana_sayfa`, `2_pdf`, `3_excel`, `4_olustur`, `5_pdf_duzenleme`.
+Görüntülerdeki örnek dosyalar `tools/generate_demo_files.py`, simge ve öne çıkan görsel
+`tools/generate_store_graphics.py` ile üretilir.
 
 ---
 

@@ -90,8 +90,8 @@ görür ve dokunur. Böylece küçültme (R8) sonrası çıkabilecek çökmeleri
 
 | Adım | Sonuç |
 |---|---|
-| Başka bir uygulamadan (WhatsApp gibi, geçici izinle) "Birlikte aç": 30 sayfalık PDF | SONUC_1 |
-| "Birlikte aç": 5 sayfalı, biçimli Excel | SONUC_1 |
+| Başka bir uygulamadan (WhatsApp gibi, geçici izinle) "Birlikte aç": 6 sayfalık PDF | SONUC_1 |
+| "Birlikte aç": 2 sayfalı, biçimli Excel | SONUC_1 |
 | Ana sayfa: iki dosya da "Son dosyalar"da | SONUC_1 |
 | Paylaş penceresi: yalnızca WhatsApp ve Telegram | SONUC_1 |
 | Oluştur → metinden PDF (PDFBox + gömülü Türkçe yazı tipi) | SONUC_2 |

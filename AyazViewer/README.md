@@ -30,7 +30,7 @@ Yeni sürümleri eskisini kaldırmadan üzerine kurabilirsiniz. Android 8.0 ve �
   <img src="magaza/ekran-goruntuleri/1_ana_sayfa.png" width="23%" alt="Ana sayfa">
   <img src="magaza/ekran-goruntuleri/2_pdf.png" width="23%" alt="PDF görüntüleyici">
   <img src="magaza/ekran-goruntuleri/3_excel.png" width="23%" alt="Excel görüntüleyici">
-  <img src="magaza/ekran-goruntuleri/6_pdf_duzenleme.png" width="23%" alt="PDF düzenleme">
+  <img src="magaza/ekran-goruntuleri/5_pdf_duzenleme.png" width="23%" alt="PDF düzenleme">
 </p>
 
 ## 📚 Belgeler
