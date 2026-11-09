@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Özgün simge: köşesi kıvrık belge + belge içinde stilize "A" ve tablo çizgileri. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- belge gövdesi -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M40,30h20l12,12v32a4,4 0,0 1,-4 4h-28a4,4 0,0 1,-4 -4v-40a4,4 0,0 1,4 -4z" />
+    <!-- kıvrık köşe -->
+    <path
+        android:fillColor="#FFC9D3FF"
+        android:pathData="M60,30v8a4,4 0,0 0,4 4h8z" />
+    <!-- stilize A -->
+    <path
+        android:fillColor="#FF4F5BF6"
+        android:pathData="M54,44l9,24h-5.2l-1.9,-5.4h-8l-1.9,5.4h-5.2l9,-24zM51.4,58.4h5.2l-2.6,-7.6z" />
+    <!-- alt çizgi -->
+    <path
+        android:fillColor="#FF8B5CF6"
+        android:pathData="M42,71h24v2.4h-24z" />
+</vector>

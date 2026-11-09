@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Paylaşım için oluşturulan geçici, birebir kopyalar -->
+    <cache-path name="share" path="share/" />
+    <!-- Kalıcı erişim verilemeyen dosyaların uygulama içi güvenli kopyaları -->
+    <files-path name="imported" path="imported/" />
+</paths>

@@ -1,0 +1,20 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/captures
+.externalNativeBuild
+.cxx
+**/build/
+*.apk
+# CI tarafından derlenen kurulabilir debug APK depoda tutulur
+!AyazViewer-debug.apk
+*.aab
+# Gizli imzalama bilgileri asla depoya eklenmez
+release.jks
+keystore.properties
+
+# Python önbelleği
+__pycache__/

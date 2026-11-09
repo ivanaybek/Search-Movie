@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Test edilen uygulamayı görebilmek için (Android 11+ paket görünürlüğü). -->
+    <queries>
+        <package android:name="com.ayaz.viewer" />
+    </queries>
+
+    <application android:label="Ayaz Viewer Smoke Test">
+        <!-- Örnek dosyalar, WhatsApp gibi başka bir uygulamadan "Birlikte aç" ile gönderilir. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="com.ayaz.viewer.smoketest.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/smoke_paths" />
+        </provider>
+    </application>
+</manifest>
