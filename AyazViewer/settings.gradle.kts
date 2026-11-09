@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "AyazViewer"
-include(":app", ":xlsx")
+include(":app", ":xlsx", ":smoketest")

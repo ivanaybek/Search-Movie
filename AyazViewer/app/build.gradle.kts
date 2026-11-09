@@ -58,6 +58,13 @@ android {
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
             signingConfig = signingConfigs.findByName("release")
         }
+        // Yayın sürümüyle aynı kod (R8 ile küçültülmüş), yalnızca debug anahtarıyla imzalı.
+        // Yayın öncesi test içindir (:smoketest modülü); mağazaya yüklenmez.
+        create("staging") {
+            initWith(getByName("release"))
+            signingConfig = signingConfigs.getByName("debug")
+            matchingFallbacks += listOf("release")
+        }
     }
 
     compileOptions {
