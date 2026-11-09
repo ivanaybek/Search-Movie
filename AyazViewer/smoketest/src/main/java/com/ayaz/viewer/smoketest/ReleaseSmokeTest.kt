@@ -20,7 +20,6 @@ import java.io.File
 import java.util.regex.Pattern
 import org.junit.After
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotNull
 import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
@@ -116,7 +115,7 @@ class ReleaseSmokeTest {
         drawLine(page, 0.42f)
         settle(800)
         screenshot("6_pdf_duzenleme")
-        save()
+        save("PDF")
         device.pressBack()
 
         // 7) Oluştur → yeni Excel tablosu, bir hücreye yaz ve kaydet
@@ -130,7 +129,7 @@ class ReleaseSmokeTest {
         typeInto(By.desc("Hücre değeri"), "Market alışverişi")
         waitFor(By.desc("Değeri uygula"), "Uygula düğmesi yok").click()
         waitFor(By.desc("Düzenlenen hücre A2"), "Değer uygulanmadı")
-        save()
+        save("Excel")
         device.pressBack()
 
         // 8) Ayarlar ve açık kaynak lisansları
@@ -200,10 +199,17 @@ class ReleaseSmokeTest {
     }
 
     /** Kaydet → "Asıl dosyanın üzerine yaz"; kayıt bitince Kaydet düğmesi yeniden pasifleşir. */
-    private fun save() {
-        waitFor(By.desc("Kaydet").enabled(true), "Kaydet düğmesi etkin değil (değişiklik algılanmadı)").click()
-        waitFor(By.text("Asıl dosyanın üzerine yaz"), "Kaydetme seçenekleri çıkmadı").click()
-        assertSaved()
+    private fun save(what: String) {
+        waitFor(By.desc("Kaydet").enabled(true), "$what: Kaydet düğmesi etkin değil (değişiklik algılanmadı)").click()
+        waitFor(By.text("Asıl dosyanın üzerine yaz"), "$what: kaydetme seçenekleri çıkmadı").click()
+        // Uygulama sonucu kısa bir bildirimle (Toast) söyler: "Kaydedildi…" veya "Kaydedilemedi: …"
+        val toast = device.wait(Until.findObject(By.textStartsWith("Kaydedil")), 8_000)?.text
+        val ok = device.wait(Until.findObject(By.desc("Kaydet").enabled(false)), TIMEOUT)
+        if (ok == null) {
+            screenshot("hata_kaydet_" + SystemClock.uptimeMillis())
+            fail("$what kaydedilemedi | bildirim: ${toast ?: "(görülmedi)"} | ekran: ${screenSummary().replace("\n", " ; ")}")
+        }
+        assertNoCrash()
     }
 
     /** Kaydırılabilir listede aşağı doğru arar. */
@@ -271,12 +277,6 @@ class ReleaseSmokeTest {
         // Satır başlığı (en fazla ~36dp) ve sütun başlığı (24dp) sonrasındaki ilk hücre (A1).
         device.click(b.left + (58 * dp).toInt(), b.top + (34 * dp).toInt())
         device.waitForIdle()
-    }
-
-    private fun assertSaved() {
-        val ok = device.wait(Until.findObject(By.desc("Kaydet").enabled(false)), TIMEOUT)
-        assertNotNull("Kaydetme tamamlanmadı (Kaydet düğmesi hâlâ etkin)", ok)
-        assertNoCrash()
     }
 
     private fun assertNoCrash() {
