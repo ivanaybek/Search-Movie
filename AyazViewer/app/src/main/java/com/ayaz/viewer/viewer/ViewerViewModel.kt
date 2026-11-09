@@ -271,6 +271,15 @@ class ViewerViewModel(application: Application) : AndroidViewModel(application) 
 
     // ------------------------------------------------------------------ kaydetme
 
+    /**
+     * Kayıt konumu seçilirken bekleyen istek. ViewModel'de tutulur; böylece sistem seçicisi
+     * açıkken ekran döndürülse veya etkinlik yeniden oluşturulsa da kaydetme kaybolmaz.
+     */
+    var pendingSave: SaveRequest? = null
+
+    /** "Telefona kaydet": PDF'in o anki hâli (kaydedilmemiş işaretlemeler dahil). */
+    fun pdfCopyRequest(entry: RecentFile) = SaveRequest(produce = { buildPdfOutput(entry) }, onOverwritten = {})
+
     fun canOverwrite(entry: RecentFile): Boolean = app.documents.canOverwrite(Uri.parse(entry.uri))
 
     /** Kullanıcı onayıyla asıl dosyanın üzerine yazar. Sonuç mesajı [done] ile bildirilir. */

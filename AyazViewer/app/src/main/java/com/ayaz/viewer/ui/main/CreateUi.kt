@@ -65,7 +65,7 @@ fun CreateSheet(
         Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp).navigationBarsPadding().padding(bottom = 16.dp)) {
             Text("Yeni belge oluştur", style = MaterialTheme.typography.titleLarge)
             Text(
-                "Belge uygulamada saklanır; \"Yeni kopya olarak kaydet\" ile telefona kaydedebilir, WhatsApp veya Telegram ile paylaşabilirsiniz.",
+                "Belge uygulamada saklanır; ⋮ menüsündeki \"Telefona kaydet\" ile telefona kaydedebilir, WhatsApp veya Telegram ile paylaşabilirsiniz.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

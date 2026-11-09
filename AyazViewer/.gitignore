@@ -15,3 +15,6 @@
 # Gizli imzalama bilgileri asla depoya eklenmez
 release.jks
 keystore.properties
+
+# Python önbelleği
+__pycache__/

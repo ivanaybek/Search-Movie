@@ -59,6 +59,26 @@ class RecentFilesPersistenceTest {
         assertTrue(TestFiles.app.recents.items.value.none { it.id == entry.id })
     }
 
+    /** "Listeyi temizle" uygulamada oluşturulan belgeleri (tek kopyaları uygulamadadır) silmemeli. */
+    @Test
+    fun clearingListKeepsCreatedDocuments() = runBlocking {
+        TestFiles.clearRecents()
+        val opened = TestFiles.seedRecent("single_page.pdf", "whatsapptan.pdf", FileKind.PDF)
+        val created = TestFiles.seedRecent("simple.xlsx", "Tablo 09.11.2026.xlsx", FileKind.XLSX)
+            .copy(created = true)
+            .let { TestFiles.app.recents.upsert(it) }
+        val openedCopy = File(android.net.Uri.parse(opened.uri).path!!)
+        val createdFile = File(android.net.Uri.parse(created.uri).path!!)
+
+        val kept = TestFiles.app.recents.clear()
+
+        assertEquals(1, kept)
+        assertEquals(listOf(created.id), TestFiles.app.recents.items.value.map { it.id })
+        assertTrue("oluşturulan belge silinmemeli", createdFile.exists())
+        assertFalse("açılan dosyanın uygulama kopyası silinmeli", openedCopy.exists())
+        TestFiles.clearRecents()
+    }
+
     @Test
     fun corruptListFileDoesNotCrash() = runBlocking {
         val app = TestFiles.app

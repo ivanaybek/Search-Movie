@@ -42,19 +42,28 @@ fun ViewerScreen(vm: ViewerViewModel, onClose: () -> Unit) {
     val context = LocalContext.current
 
     // ---- kaydetme akışı (her seferinde sorulur)
-    var pendingSave by remember { mutableStateOf<SaveRequest?>(null) }
     var choiceFor by remember { mutableStateOf<RecentFile?>(null) }
     val current = (state as? ViewerState.Pdf)?.file ?: (state as? ViewerState.Xlsx)?.file
     val mime = if (current?.kind == FileKind.PDF) FileKinds.MIME_PDF else FileKinds.MIME_XLSX
     val toast: (String) -> Unit = { Toast.makeText(context, it, Toast.LENGTH_LONG).show() }
     val createLauncher = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument(mime)) { uri ->
-        val req = pendingSave
-        pendingSave = null
+        val req = vm.pendingSave
+        vm.pendingSave = null
         if (uri != null && req != null) vm.saveAsNew(uri, req, toast)
     }
     val requestSave: (SaveRequest) -> Unit = { req ->
-        pendingSave = req
+        vm.pendingSave = req
         choiceFor = current
+    }
+    // "Telefona kaydet": değişiklik olmasa da belgenin bir kopyası kullanıcının seçtiği yere kaydedilir.
+    val saveCopy: (SaveRequest) -> Unit = { req ->
+        vm.pendingSave = req
+        try {
+            createLauncher.launch(current?.name ?: "belge")
+        } catch (_: ActivityNotFoundException) {
+            vm.pendingSave = null
+            toast("Bu cihazda kaydetme konumu seçici bulunamadı.")
+        }
     }
     choiceFor?.let { f ->
         SaveChoiceDialog(
@@ -62,8 +71,8 @@ fun ViewerScreen(vm: ViewerViewModel, onClose: () -> Unit) {
             canOverwrite = remember(f.uri) { vm.canOverwrite(f) },
             onOverwrite = {
                 choiceFor = null
-                val req = pendingSave
-                pendingSave = null
+                val req = vm.pendingSave
+                vm.pendingSave = null
                 if (req != null) vm.saveOverwrite(f, req, toast)
             },
             onNewCopy = {
@@ -71,11 +80,11 @@ fun ViewerScreen(vm: ViewerViewModel, onClose: () -> Unit) {
                 try {
                     createLauncher.launch(editedCopyName(f.name))
                 } catch (_: ActivityNotFoundException) {
-                    pendingSave = null
+                    vm.pendingSave = null
                     toast("Bu cihazda kaydetme konumu seçici bulunamadı.")
                 }
             },
-            onDismiss = { choiceFor = null; pendingSave = null },
+            onDismiss = { choiceFor = null; vm.pendingSave = null },
         )
     }
 
@@ -104,6 +113,7 @@ fun ViewerScreen(vm: ViewerViewModel, onClose: () -> Unit) {
                 onShare = { shareFile = s.file },
                 onPageChanged = { vm.savePdfPage(s.file, it) },
                 edit = remember(s.file.id) { vm.pdfEditActions(s.file, requestSave) },
+                onSaveCopy = { saveCopy(vm.pdfCopyRequest(s.file)) },
                 startInEdit = vm.startInEdit,
             )
             is ViewerState.Xlsx -> XlsxViewerScreen(
@@ -116,6 +126,7 @@ fun ViewerScreen(vm: ViewerViewModel, onClose: () -> Unit) {
                 onShare = { shareFile = s.file },
                 onSheetChanged = { vm.saveSheet(s.file, it) },
                 onSaveRequest = requestSave,
+                onSaveCopy = { saveCopy(SaveRequest(produce = { s.controller.currentFile }, onOverwritten = {})) },
                 startInEdit = vm.startInEdit,
             )
         }

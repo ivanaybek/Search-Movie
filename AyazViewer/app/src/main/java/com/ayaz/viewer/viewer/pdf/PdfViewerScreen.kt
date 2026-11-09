@@ -181,6 +181,7 @@ fun PdfViewerScreen(
     onShare: () -> Unit,
     onPageChanged: (Int) -> Unit,
     edit: PdfEditActions,
+    onSaveCopy: () -> Unit,
     startInEdit: Boolean = false,
 ) {
     val extra = LocalAyazColors.current
@@ -346,6 +347,11 @@ fun PdfViewerScreen(
                                     text = { Text("Yakınlaştırmayı sıfırla") },
                                     onClick = { menu = false; zoom.reset() },
                                 )
+                                DropdownMenuItem(
+                                    text = { Text("Telefona kaydet") },
+                                    leadingIcon = { Icon(AyazIcons.Save, null) },
+                                    onClick = { menu = false; onSaveCopy() },
+                                )
                             }
                         }
                     },
@@ -390,7 +396,8 @@ fun PdfViewerScreen(
             if (es.busy) LinearProgressIndicator(Modifier.fillMaxWidth().align(Alignment.TopCenter))
             val indicatorAlpha by animateFloatAsState(if (indicatorVisible || searchOpen) 1f else 0f, tween(300), label = "indicator")
             Box(
-                Modifier.align(Alignment.BottomCenter).navigationBarsPadding().padding(bottom = 20.dp)
+                // Scaffold dolgusu gezinme çubuğunu zaten içerir; ayrıca eklenirse gösterge fazla yukarıda kalır.
+                Modifier.align(Alignment.BottomCenter).padding(bottom = 20.dp)
                     .graphicsLayer { alpha = indicatorAlpha },
             ) {
                 Box(

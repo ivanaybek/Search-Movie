@@ -20,6 +20,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,6 +51,8 @@ import com.ayaz.viewer.ui.main.MainViewModel
 fun SettingsScreen(vm: MainViewModel) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val usage by vm.storageUsage.collectAsStateWithLifecycle()
+    var confirmClear by remember { mutableStateOf(false) }
+    var showLicenses by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { vm.refreshStorage() }
 
     LazyColumn(
@@ -98,7 +110,7 @@ fun SettingsScreen(vm: MainViewModel) {
                 SpacerH(10)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(onClick = vm::cleanUnusedCopies) { Text("Kullanılmayanları temizle") }
-                    OutlinedButton(onClick = vm::clearRecents) { Text("Listeyi temizle") }
+                    OutlinedButton(onClick = { confirmClear = true }) { Text("Listeyi temizle") }
                 }
             }
         }
@@ -119,13 +131,54 @@ fun SettingsScreen(vm: MainViewModel) {
             SettingsGroup(Icons.Filled.Info, "Hakkında") {
                 Text("Ayaz Viewer ${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyLarge)
                 Text(
-                    "Kişisel kullanım için PDF ve XLSX görüntüleyici.",
+                    "PDF ve Excel (XLSX) dosyalarını görüntüleme, düzenleme ve oluşturma uygulaması.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                SpacerH(10)
+                OutlinedButton(onClick = { showLicenses = true }) { Text("Açık kaynak lisansları") }
             }
         }
     }
+
+    if (confirmClear) {
+        AlertDialog(
+            onDismissRequest = { confirmClear = false },
+            title = { Text("Liste temizlensin mi?") },
+            text = {
+                Text(
+                    "Son açılanlar listesi temizlenir. Telefonunuzdaki asıl dosyalar silinmez. " +
+                        "Ayaz Viewer'da oluşturduğunuz belgeler listede kalır.",
+                )
+            },
+            confirmButton = { TextButton(onClick = { confirmClear = false; vm.clearRecents() }) { Text("Temizle") } },
+            dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Vazgeç") } },
+        )
+    }
+    if (showLicenses) LicensesDialog(onDismiss = { showLicenses = false })
+}
+
+/** Uygulamada kullanılan açık kaynak bileşenlerin lisans metinleri (assets/licenses.txt). */
+@Composable
+private fun LicensesDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val text = remember {
+        try {
+            context.assets.open("licenses.txt").bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } catch (_: Exception) {
+            "Lisans metni yüklenemedi."
+        }
+    }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Açık kaynak lisansları") },
+        text = {
+            Column(Modifier.heightIn(max = 460.dp).verticalScroll(rememberScrollState())) {
+                Text(text, style = MaterialTheme.typography.bodySmall, fontFamily = FontFamily.Monospace)
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Kapat") } },
+    )
 }
 
 @Composable

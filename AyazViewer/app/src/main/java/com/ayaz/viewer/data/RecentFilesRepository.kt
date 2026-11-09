@@ -75,11 +75,14 @@ class RecentFilesRepository(
         }
     }
 
-    suspend fun clear() {
-        mutate { list ->
-            list.filter { it.isPrivateCopy }.forEach { documents.deleteImported(it.id) }
-            emptyList<RecentFile>() to Unit
-        }
+    /**
+     * Listeyi temizler. Uygulamada oluşturulan belgelerin tek kopyası uygulamada durduğu için
+     * bunlar silinmez, listede kalır. Korunan belge sayısı döner.
+     */
+    suspend fun clear(): Int = mutate { list ->
+        val (kept, dropped) = list.partition { it.created }
+        dropped.filter { it.isPrivateCopy }.forEach { documents.deleteImported(it.id) }
+        kept to kept.size
     }
 
     private suspend fun <T> mutate(block: (List<RecentFile>) -> Pair<List<RecentFile>, T>): T {

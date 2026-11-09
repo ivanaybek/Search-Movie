@@ -118,7 +118,12 @@ fun RecentsScreen(recents: List<RecentFile>, actions: MainActions, onClearAll: (
         AlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("Liste temizlensin mi?") },
-            text = { Text("Son açılanlar listesi temizlenir. Telefonunuzdaki asıl dosyalar silinmez.") },
+            text = {
+                Text(
+                    "Son açılanlar listesi temizlenir. Telefonunuzdaki asıl dosyalar silinmez. " +
+                        "Ayaz Viewer'da oluşturduğunuz belgeler listede kalır.",
+                )
+            },
             confirmButton = { TextButton(onClick = { confirmClear = false; onClearAll() }) { Text("Temizle") } },
             dismissButton = { TextButton(onClick = { confirmClear = false }) { Text("Vazgeç") } },
         )

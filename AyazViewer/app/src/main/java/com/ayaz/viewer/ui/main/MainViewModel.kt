@@ -84,8 +84,13 @@ class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     fun clearRecents() {
         viewModelScope.launch {
-            app.recents.clear()
-            _events.send(MainEvent.Message("Son açılanlar listesi temizlendi."))
+            val kept = app.recents.clear()
+            _events.send(
+                MainEvent.Message(
+                    if (kept > 0) "Liste temizlendi. Uygulamada oluşturduğunuz $kept belge korundu."
+                    else "Son açılanlar listesi temizlendi.",
+                ),
+            )
             refreshStorage()
         }
     }

@@ -39,5 +39,9 @@ object TestFiles {
         return runBlocking { app.recents.upsert(entry) }
     }
 
-    fun clearRecents() = runBlocking { app.recents.clear() }
+    /** Testler arası temiz başlangıç: oluşturulan belgeler dahil tüm kayıtları kaldırır. */
+    fun clearRecents() = runBlocking {
+        app.recents.awaitLoaded()
+        app.recents.items.value.forEach { app.recents.remove(it.id) }
+    }
 }

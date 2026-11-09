@@ -103,6 +103,7 @@ fun XlsxViewerScreen(
     onShare: () -> Unit,
     onSheetChanged: (Int) -> Unit,
     onSaveRequest: (SaveRequest) -> Unit,
+    onSaveCopy: () -> Unit,
     startInEdit: Boolean = false,
 ) {
     val context = LocalContext.current
@@ -259,6 +260,11 @@ fun XlsxViewerScreen(
                                 DropdownMenuItem(
                                     text = { Text("Başa dön (A1)") },
                                     onClick = { menu = false; gridState.scrollX = 0f; gridState.scrollY = 0f },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Telefona kaydet") },
+                                    leadingIcon = { Icon(AyazIcons.Save, null) },
+                                    onClick = { menu = false; onSaveCopy() },
                                 )
                             }
                         }

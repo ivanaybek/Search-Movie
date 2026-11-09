@@ -216,7 +216,7 @@ fun MainScreen(vm: MainViewModel, openViewer: (String, Boolean) -> Unit) {
             text = {
                 Text(
                     "\"${f.name}\" Ayaz Viewer içinde oluşturuldu ve yalnızca uygulamada kayıtlı. Listeden kaldırırsanız " +
-                        "kalıcı olarak silinir. Saklamak için önce açıp \"Yeni kopya olarak kaydet\" ile telefona kaydedin.",
+                        "kalıcı olarak silinir. Saklamak için önce açıp ⋮ menüsünden \"Telefona kaydet\"i seçin.",
                 )
             },
             confirmButton = {
