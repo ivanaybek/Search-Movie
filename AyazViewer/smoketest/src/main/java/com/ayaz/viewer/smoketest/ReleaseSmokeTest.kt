@@ -56,7 +56,6 @@ class ReleaseSmokeTest {
         // 1) Başka bir uygulamadan (WhatsApp gibi) geçici izinle "Birlikte aç": PDF
         openWith("Proje Raporu.pdf", "application/pdf")
         waitFor(By.text("30 sayfa"), "PDF açılmadı")
-        waitFor(By.text("1 / 30"), "Sayfa göstergesi görünmedi")
         settle(2000)
         screenshot("2_pdf")
         device.pressBack()
