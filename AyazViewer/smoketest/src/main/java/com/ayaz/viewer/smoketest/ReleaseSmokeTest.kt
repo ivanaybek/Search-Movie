@@ -180,9 +180,21 @@ class ReleaseSmokeTest {
         if (found == null) {
             assertNoCrash()
             screenshot("hata_" + SystemClock.uptimeMillis())
-            fail("$message ($selector)")
+            fail("$message ($selector)\nEkrandakiler:\n${screenSummary()}")
         }
         return found!!
+    }
+
+    /** Hata ayıklama: ekrandaki metinler ve açıklamalar (hata mesajına eklenir). */
+    private fun screenSummary(): String = try {
+        val out = java.io.ByteArrayOutputStream()
+        device.dumpWindowHierarchy(out)
+        val xml = out.toString("UTF-8")
+        Regex("""(text|content-desc)="([^"]+)"""").findAll(xml)
+            .map { "${it.groupValues[1]}: ${it.groupValues[2].take(80)}" }
+            .distinct().take(60).joinToString("\n")
+    } catch (e: Exception) {
+        "(ekran okunamadı: $e)"
     }
 
     /** Kaydet → "Asıl dosyanın üzerine yaz"; kayıt bitince Kaydet düğmesi yeniden pasifleşir. */
@@ -211,8 +223,14 @@ class ReleaseSmokeTest {
     private fun typeInto(selector: BySelector, text: String) {
         val field = waitFor(selector, "Metin alanı yok")
         field.click()
+        device.waitForIdle()
         field.text = text
         device.waitForIdle()
+        val now = device.findObject(selector)?.text.orEmpty()
+        if (!now.contains(text.take(6))) {
+            screenshot("hata_" + SystemClock.uptimeMillis())
+            fail("Metin yazılamadı ($selector): \"$now\"\nEkrandakiler:\n${screenSummary()}")
+        }
     }
 
     private fun settle(ms: Long) {
