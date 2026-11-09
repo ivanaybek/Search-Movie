@@ -4,6 +4,7 @@ import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import androidx.compose.ui.graphics.toPixelMap
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.captureToImage
 import androidx.compose.ui.test.hasSetTextAction
@@ -297,7 +298,31 @@ class ViewerUiTest {
             }
             assertTrue("kaydedilen PDF'te kırmızı çizim görünmeli ($red)", red > 30)
             waitDesc("Sayfa 1 / 1", 30_000)
+            // Kayıttan sonra belge yeniden açılır: bekleyen işaretlemeler temizlenir ve sayfa yeni dosyadan
+            // çizilmelidir. (Hata: eski sayfa görüntüsü ekranda kalıyor, kaydedilen çizim görünmüyordu.)
+            rule.waitUntil(20_000) {
+                rule.onAllNodesWithContentDescription("Kaydet").fetchSemanticsNodes()
+                    .none { SemanticsProperties.Disabled !in it.config }
+            }
+            var onScreen = 0
+            val screenDeadline = System.currentTimeMillis() + 15_000
+            while (System.currentTimeMillis() < screenDeadline) {
+                onScreen = try { redPixelsOnScreen("Sayfa 1") } catch (_: Throwable) { 0 }
+                if (onScreen > 30) break
+                Thread.sleep(300)
+            }
+            assertTrue("kaydettikten sonra ekrandaki sayfada çizim görünmeli ($onScreen)", onScreen > 30)
         }
+    }
+
+    private fun redPixelsOnScreen(desc: String): Int {
+        val map = rule.onNodeWithContentDescription(desc).captureToImage().toPixelMap()
+        var n = 0
+        for (y in 0 until map.height step 2) for (x in 0 until map.width step 2) {
+            val c = map[x, y]
+            if (c.red > 0.78f && c.green < 0.43f && c.blue < 0.43f) n++
+        }
+        return n
     }
 
     private fun redPixelsOnFirstPage(f: File): Int {

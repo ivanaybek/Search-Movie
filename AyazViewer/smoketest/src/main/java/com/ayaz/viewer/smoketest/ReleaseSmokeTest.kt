@@ -116,6 +116,18 @@ class ReleaseSmokeTest {
         settle(800)
         screenshot("6_pdf_duzenleme")
         save("PDF")
+        // Kaydedilen vurgu, belge yeniden açıldıktan sonra sayfanın kendisinde görünmeli.
+        var yellow = 0
+        val until = SystemClock.uptimeMillis() + 15_000
+        while (SystemClock.uptimeMillis() < until) {
+            yellow = yellowPixels(page)
+            if (yellow > 1500) break
+            SystemClock.sleep(500)
+        }
+        if (yellow <= 1500) {
+            screenshot("hata_vurgu_" + SystemClock.uptimeMillis())
+            fail("Kaydedilen PDF'te vurgu ekranda görünmüyor (sarı piksel: $yellow)")
+        }
         device.pressBack()
 
         // 7) Oluştur → yeni Excel tablosu, bir hücreye yaz ve kaydet
@@ -203,9 +215,15 @@ class ReleaseSmokeTest {
         waitFor(By.desc("Kaydet").enabled(true), "$what: Kaydet düğmesi etkin değil (değişiklik algılanmadı)").click()
         waitFor(By.text("Asıl dosyanın üzerine yaz"), "$what: kaydetme seçenekleri çıkmadı").click()
         // Uygulama sonucu kısa bir bildirimle (Toast) söyler: "Kaydedildi…" veya "Kaydedilemedi: …"
-        val toast = device.wait(Until.findObject(By.textStartsWith("Kaydedil")), 8_000)?.text
-        val ok = device.wait(Until.findObject(By.desc("Kaydet").enabled(false)), TIMEOUT)
-        if (ok == null) {
+        val toast = device.wait(Until.findObject(By.textStartsWith("Kaydedil")), 3_000)?.text
+        // Seçici önbelleği "etkin" durumunu geç güncelleyebildiği için düğmenin güncel durumu doğrudan okunur.
+        val deadline = SystemClock.uptimeMillis() + TIMEOUT
+        var ok = false
+        while (!ok && SystemClock.uptimeMillis() < deadline) {
+            ok = try { device.findObject(By.desc("Kaydet"))?.isEnabled == false } catch (_: Exception) { false }
+            if (!ok) SystemClock.sleep(300)
+        }
+        if (!ok) {
             screenshot("hata_kaydet_" + SystemClock.uptimeMillis())
             val crash = shell("logcat -b crash -d").takeLast(2500)
             val log = shell("logcat -d -t 4000").lines()
@@ -276,6 +294,30 @@ class ReleaseSmokeTest {
         val y = area[1] + ((area[3] - area[1]) * yRatio).toInt()
         device.swipe(area[0], y, area[2], y, 40)
         device.waitForIdle()
+    }
+
+    /** Sayfa alanındaki sarı (vurgulayıcı) piksel sayısı. */
+    private fun yellowPixels(area: IntArray): Int {
+        val shot = instrumentation.uiAutomation.takeScreenshot() ?: return 0
+        val bmp = if (shot.config == android.graphics.Bitmap.Config.HARDWARE) {
+            shot.copy(android.graphics.Bitmap.Config.ARGB_8888, false)
+        } else shot
+        var n = 0
+        var y = area[1]
+        while (y < area[3].coerceAtMost(bmp.height)) {
+            var x = area[0]
+            while (x < area[2].coerceAtMost(bmp.width)) {
+                val c = bmp.getPixel(x, y)
+                val r = (c shr 16) and 0xFF
+                val g = (c shr 8) and 0xFF
+                val b = c and 0xFF
+                if (r > 225 && g > 195 && b < 200 && g - b > 40) n++
+                x += 2
+            }
+            y += 2
+        }
+        bmp.recycle()
+        return n * 4
     }
 
     private fun tapFirstCell(grid: UiObject2) {
